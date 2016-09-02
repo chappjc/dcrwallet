@@ -7,6 +7,7 @@ package rpctest
 import (
 	"fmt"
 	"io/ioutil"
+	"math"
 	"net"
 	"os"
 	"path/filepath"
@@ -191,6 +192,7 @@ func (h *Harness) SetUp(createTestChain bool, numMatureOutputs uint32) error {
 	if err = h.node.Start(); err != nil {
 		return err
 	}
+	time.Sleep(7 * time.Second)
 	if err := h.connectRPCClient(); err != nil {
 		return err
 	}
@@ -204,9 +206,9 @@ func (h *Harness) SetUp(createTestChain bool, numMatureOutputs uint32) error {
 	// Connect walletClient so we can get the mining address
 	var walletClient *rpc.Client
 	walletRPCConf := h.wallet.config.rpcConnConfig()
-	for i := 0; i < 200; i++ {
+	for i := 1; i < 2000; i++ {
 		if walletClient, err = rpc.New(&walletRPCConf, nil); err != nil {
-			time.Sleep(time.Duration(i) * 50 * time.Millisecond)
+			time.Sleep(time.Duration(math.Log(float64(i))) * 100 * time.Millisecond)
 			continue
 		}
 		break
@@ -221,7 +223,7 @@ func (h *Harness) SetUp(createTestChain bool, numMatureOutputs uint32) error {
 	var miningAddr dcrutil.Address
 	for i := 0; i < 100; i++ {
 		if miningAddr, err = walletClient.GetNewAddress("default"); err != nil {
-			time.Sleep(time.Duration(i) * 50 * time.Millisecond)
+			time.Sleep(time.Duration(math.Log(float64(i))) * 100 * time.Millisecond)
 			continue
 		}
 		break
@@ -348,9 +350,9 @@ func (h *Harness) connectRPCClient() error {
 	var err error
 
 	rpcConf := h.node.config.rpcConnConfig()
-	for i := 0; i < h.maxConnRetries; i++ {
+	for i := 1; i < h.maxConnRetries; i++ {
 		if client, err = rpc.New(&rpcConf, h.handlers); err != nil {
-			time.Sleep(time.Duration(i) * 50 * time.Millisecond)
+			time.Sleep(time.Duration(math.Log(float64(i))) * 100 * time.Millisecond)
 			continue
 		}
 		break
